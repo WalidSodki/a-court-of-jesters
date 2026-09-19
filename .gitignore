@@ -1,0 +1,13 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+/exports/
+export_presets.cfg
+
+# Imported files cache (regenerated on open)
+*.import.log
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.tmp

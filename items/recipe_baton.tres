@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CombineRecipe" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://items/CombineRecipe.gd" id="1"]
+[ext_resource type="Resource" path="res://items/bells.tres" id="2"]
+[ext_resource type="Resource" path="res://items/stick.tres" id="3"]
+[ext_resource type="Resource" path="res://items/baton.tres" id="4"]
+
+[resource]
+script = ExtResource("1")
+input_a = ExtResource("2")
+input_b = ExtResource("3")
+result = ExtResource("4")

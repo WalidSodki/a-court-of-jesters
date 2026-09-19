@@ -1,0 +1,44 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="A Court of Jesters"
+config/description="Vertical slice demo. Placeholder art (Kenney 16x16)."
+run/main_scene="res://world/Boot.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+config/icon="res://icon.svg"
+
+[autoload]
+
+Controls="*res://managers/Controls.gd"
+GameState="*res://managers/GameState.gd"
+Inventory="*res://managers/Inventory.gd"
+AudioManager="*res://managers/AudioManager.gd"
+Transitions="*res://managers/Transitions.gd"
+World="*res://managers/World.gd"
+Dialogue="*res://managers/DialogueManager.gd"
+InventoryScreen="*res://ui/InventoryUI.gd"
+Debug="*res://managers/DebugOverlay.gd"
+
+[display]
+
+window/size/viewport_width=320
+window/size/viewport_height=200
+window/size/window_width_override=1280
+window/size/window_height_override=800
+window/stretch/mode="canvas_items"
+window/stretch/scale_mode="integer"
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=0
+renderer/rendering_method="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.09, 0.07, 0.11, 1)

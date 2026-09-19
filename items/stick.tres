@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://items/ItemData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"stick"
+display_name = "Baton Handle"
+description = "A carved wooden handle, given by the steward. It wants a flourish on top."
+icon_index = 131
+combinable = true

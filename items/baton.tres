@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://items/ItemData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"baton"
+display_name = "Jester's Marotte"
+description = "Bells lashed to a handle — a proper fool's scepter. The stage calls for it."
+icon_index = 119
+combinable = false
