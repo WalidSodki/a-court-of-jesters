@@ -7,6 +7,11 @@ extends Node
 const TILESET := "res://world/tileset/court_tileset.tres"
 const OUT_DIR := "res://world/"
 
+## Safety: by default this scaffolder only creates rooms that don't exist yet, so
+## re-running it can never clobber a room you've since hand-edited in the editor.
+## Flip to true (temporarily) only when you deliberately want to regenerate.
+const FORCE_REBUILD := false
+
 const BELLS := "res://items/bells.tres"
 const STICK := "res://items/stick.tres"
 const BATON := "res://items/baton.tres"
@@ -37,6 +42,23 @@ const ANTECHAMBER_MAP := [
 	"#...........#",
 	"#...........#",
 	"#############",
+]
+
+# Stealth corridor: enter bottom, reach the exit door at the top past two
+# patrolling guards, using the wall pillars as cover to break their sight lines.
+const PASSAGE_MAP := [
+	"####################",
+	"#..................#",
+	"#..................#",
+	"#....##......##....#",
+	"#..................#",
+	"#..................#",
+	"#....##......##....#",
+	"#..................#",
+	"#..................#",
+	"#..................#",
+	"#..................#",
+	"####################",
 ]
 
 
@@ -101,11 +123,40 @@ func _ready() -> void:
 		],
 	})
 
+	_build({
+		"name": "Passage",
+		"map": PASSAGE_MAP,
+		"floor": 37, "wall": 2,
+		"night": Color(0.26, 0.26, 0.40),
+		"vignette": 0.62,
+		"play_intro": false,
+		"spawns": {"default": Vector2i(10, 10), "from_hall": Vector2i(10, 10)},
+		"entities": [
+			{"scene": "res://entities/StealthController.tscn", "name": "Stealth", "cell": Vector2i(1, 1),
+				"props": {"respawn_spawn_id": &"default"}},
+			{"scene": "res://entities/Guard.tscn", "name": "Guard1", "cell": Vector2i(5, 4),
+				"props": {"patrol_points": PackedVector2Array([Vector2(0, 0), Vector2(144, 0)])}},
+			{"scene": "res://entities/Guard.tscn", "name": "Guard2", "cell": Vector2i(14, 7),
+				"props": {"patrol_points": PackedVector2Array([Vector2(0, 0), Vector2(-144, 0)])}},
+			{"scene": "res://entities/Door.tscn", "name": "ExitDoor", "cell": Vector2i(10, 1),
+				"props": {"target_scene": "res://world/GreatHall.tscn", "spawn_id": &"from_antechamber", "prompt": "Slip out"}},
+			{"scene": "res://entities/Torch.tscn", "name": "TorchLeft", "cell": Vector2i(2, 1),
+				"props": {"lit": true}},
+			{"scene": "res://entities/Torch.tscn", "name": "TorchRight", "cell": Vector2i(17, 1),
+				"props": {"lit": true}},
+		],
+	})
+
 	print("Rooms built.")
 	get_tree().quit()
 
 
 func _build(def: Dictionary) -> void:
+	var out: String = OUT_DIR + def.name + ".tscn"
+	if not FORCE_REBUILD and FileAccess.file_exists(out):
+		print("  %s.tscn exists — skipped (set FORCE_REBUILD to overwrite)" % def.name)
+		return
+
 	var tile_set: TileSet = load(TILESET)
 	var root := Room.new()
 	root.name = def.name
@@ -158,7 +209,7 @@ func _build(def: Dictionary) -> void:
 
 	var packed := PackedScene.new()
 	var perr := packed.pack(root)
-	var serr := ResourceSaver.save(packed, OUT_DIR + def.name + ".tscn")
+	var serr := ResourceSaver.save(packed, out)
 	print("  %s.tscn (pack %d, save %d)" % [def.name, perr, serr])
 	root.free()
 

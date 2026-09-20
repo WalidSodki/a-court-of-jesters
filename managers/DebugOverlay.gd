@@ -4,6 +4,7 @@ extends Node
 ##
 ## Hotkeys while visible:
 ##   1/2/3  grant Bells / Stick / Marotte
+##   4      jump to the Passage (stealth section)
 ##   5/6    set steward_impressed true / false
 ##   7      jump straight into the court performance (rhythm minigame)
 ##   8      play the intro cutscene
@@ -57,7 +58,7 @@ func _process(_delta: float) -> void:
 		return
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	var pos := player.global_position if player != null else Vector2.ZERO
-	_label.text = "DEBUG  (F1)\nmode: %s\nfps: %d\npos: %d, %d\nnoclip: %s\nflags: %s\nitems: %s\nheld: %s\n[1/2/3] give  [5/6] steward  [7] perform  [8] intro  [9] noclip  [0] reload" % [
+	_label.text = "DEBUG  (F1)\nmode: %s\nfps: %d\npos: %d, %d\nnoclip: %s\nflags: %s\nitems: %s\nheld: %s\n[1/2/3] give  [4] passage  [5/6] steward  [7] perform  [8] intro  [9] noclip  [0] reload" % [
 		GameState.mode_name(),
 		Engine.get_frames_per_second(),
 		pos.x, pos.y,
@@ -80,6 +81,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	var key := (event as InputEventKey).keycode
 	if ITEM_PATHS.has(key):
 		Inventory.add(load(ITEM_PATHS[key]))
+	elif key == KEY_4:
+		World.go_to("res://world/Passage.tscn")
 	elif key == KEY_5:
 		GameState.set_flag("steward_impressed", true)
 	elif key == KEY_6:
