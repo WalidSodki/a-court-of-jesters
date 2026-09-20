@@ -119,11 +119,13 @@ func _build(def: Dictionary) -> void:
 	var floor_layer := TileMapLayer.new()
 	floor_layer.name = "Floor"
 	floor_layer.tile_set = tile_set
+	floor_layer.collision_enabled = false  # walkable: Floor never collides
 	root.add_child(floor_layer)
 
 	var wall_layer := TileMapLayer.new()
 	wall_layer.name = "Walls"
 	wall_layer.tile_set = tile_set
+	wall_layer.collision_enabled = true    # solid: anything painted here blocks
 	root.add_child(wall_layer)
 
 	_paint(floor_layer, wall_layer, def.map, def.floor, def.wall)

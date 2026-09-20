@@ -136,11 +136,12 @@ Cutscenes are **real-time, in-engine scripted sequences** — the game temporari
 The foundation is built. Match these established conventions before inventing new ones.
 
 - **Run it:** open the project in Godot 4.7 and press Play, or headless-check with
-  `"<godot>" --headless --path . --quit-after 90`. Main scene: `world/DemoRoom.tscn`.
+  `"<godot>" --headless --path . --quit-after 90`. Main scene: `world/Boot.tscn`
+  (→ `world/GreatHall.tscn`).
 - **Control-mode spine:** `GameState.mode` (enum `EXPLORING/DIALOGUE/MENU/CUTSCENE/MINIGAME`, a push/pop stack) is the single source of truth for input gating. The player only moves in `EXPLORING`; dialogue, menus, and cutscenes disable control by changing the mode — **never** by poking the player script.
 - **Autoloads (`managers/`, kept lean):** `Controls` (registers the input map in code), `GameState` (mode + story flags, serializable), `Inventory` (items + combine + held item), `AudioManager` (pooled SFX, loads `audio/*.wav`), `Transitions` (fades), `World` (room switching), `Dialogue` (data-driven dialogue + choices), `InventoryScreen` (inventory UI), `Debug` (dev overlay).
 - **Maps are editor-authored scenes (author them visually):** each room (`world/GreatHall.tscn`, `world/Antechamber.tscn`) is a `Node2D` with the `Room.gd` controller, painted `Floor`/`Walls` `TileMapLayer`s using the shared `world/tileset/court_tileset.tres`, an `Entities` node of placed prefab instances, and a `Spawns` node of `Marker2D`s. Edit layouts with the TileMap painter; place entities by dragging prefabs from `entities/`. **Do not generate maps in scripts.** `tools/BuildRooms.tscn` only re-scaffolds a room from scratch; day-to-day design is in the editor.
-- **TileSet & collision:** `world/tileset/court_tileset.tres` (rebuild via `tools/BuildTileSet.tscn`) is the shared tile atlas. Wall tiles carry a collision polygon on physics layer 0 (collision layer 1); painting them on the `Walls` layer makes them solid automatically — no separate collider nodes.
+- **TileSet & collision (layer-based):** `world/tileset/court_tileset.tres` (rebuild via `tools/BuildTileSet.tscn`) is the shared tile atlas. **Every** tile carries a full-cell collision shape on physics layer 0 (collision layer 1), so solidity is decided by the layer, not the tile: the **`Walls`** `TileMapLayer` has `collision_enabled = true` (paint anything here → solid) and the **`Floor`** layer has `collision_enabled = false` (walkable). Works with any art; no separate collider nodes. For a 3/4 look, paint solid rows on `Walls` and the walkable front-face row on `Floor`, and keep doors on a walkable cell at the wall base.
 - **Entity prefabs (`entities/`):** `Chest`, `Pedestal`, `Door`, `Steward`, `Torch`, `Ghost`, `ExamineSpot` — reusable scenes configured via `@export` in the inspector (chest's item, door's target scene + spawn id, torch's `react_flag`, examine spot's lines, etc.). Add a new interactable = new prefab, not room-script code.
 - **Rooms & transitions:** main scene is `world/Boot.tscn` → `World.go_to(scene, spawn_id)`. A `Door` prefab moves between rooms and spawns the player at the destination's named `Marker2D`; autoloads persist across the swap. `Room.gd` only spawns the player, sizes the camera to the map, and optionally plays the intro.
 - **Atmosphere:** rooms use a dark `CanvasModulate` + `FlickerLight` torches + a player glow + a vignette, so lighting carries mood. `ShakeCamera.shake()` is on the player camera for impacts/scares.
@@ -149,8 +150,8 @@ The foundation is built. Match these established conventions before inventing ne
 - **Interaction:** everything the player can act on extends `interaction/Interactable.gd` (an `Area2D` on physics layer 2); `InteractionSensor` on the player finds the nearest and calls `interact()`. Reuse this for new NPCs/props — don't write bespoke input handling.
 - **Choices matter:** dialogue choices write flags via `GameState.set_flag()`; consequences read them back (the M1 steward choice lights/dims the stage and changes later lines). Route every consequence through flags.
 - **Items are data:** `items/*.tres` (`ItemData`, `CombineRecipe`). Add an item = add a `.tres`; add a puzzle = add a recipe + set an `Interactable`'s required item. `Art.gd` slices the placeholder sheet by index.
-- **Feature folders:** `managers/ player/ interaction/ items/ ui/ world/ cutscene/ debug/`.
-- **Tile indices** for a room are constants at the top of its script (e.g. `DemoRoom.gd`) — adjust there if a placeholder tile reads wrong.
+- **Feature folders:** `managers/ player/ interaction/ items/ ui/ world/ cutscene/ minigames/ debug/`.
+- **Tiles:** rooms are painted in the editor against `world/tileset/court_tileset.tres`; if a placeholder tile reads wrong, repaint it or regenerate the atlas via `tools/BuildTileSet.tscn` (use `tools/AtlasViewer.tscn` for the numbered contact sheet).
 
 ## Code Style
 
