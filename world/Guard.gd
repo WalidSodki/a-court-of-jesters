@@ -33,6 +33,7 @@ var _wait := 0.0
 var _facing := Vector2.DOWN
 var _detection := 0.0
 var _home := Vector2.ZERO
+var _player: Node2D                        # cached; re-fetched only if freed
 var _sprite: Sprite2D
 var _cone: Polygon2D
 var _mark: Label
@@ -51,6 +52,13 @@ func _ready() -> void:
 
 func get_detection() -> float:
 	return _detection
+
+
+## Cached player lookup — avoids a group scan every physics frame per guard.
+func _player_node() -> Node2D:
+	if not is_instance_valid(_player):
+		_player = get_tree().get_first_node_in_group("player") as Node2D
+	return _player
 
 
 ## Return to start and forget the player (called after a catch).
@@ -100,17 +108,19 @@ func _advance_target() -> void:
 
 
 func _sense(delta: float) -> void:
+	var prev := _detection
 	if _can_see_player():
 		_detection = clampf(_detection + fill_rate * delta, 0.0, 1.0)
 	else:
 		_detection = clampf(_detection - drain_rate * delta, 0.0, 1.0)
-	detection_changed.emit(_detection)
-	if _detection >= 1.0:
+	if not is_equal_approx(_detection, prev):
+		detection_changed.emit(_detection)
+	if _detection >= 1.0 and prev < 1.0:
 		caught.emit()
 
 
 func _can_see_player() -> bool:
-	var player := get_tree().get_first_node_in_group("player") as Node2D
+	var player := _player_node()
 	if player == null:
 		return false
 	var to: Vector2 = player.global_position - global_position

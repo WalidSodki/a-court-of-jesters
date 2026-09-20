@@ -7,6 +7,9 @@ export_presets.cfg
 # Imported files cache (regenerated on open)
 *.import.log
 
+# Dev-tool screenshots / atlas contact sheets (Screenshotter, AtlasViewer)
+/.captures/
+
 # OS / editor cruft
 .DS_Store
 Thumbs.db

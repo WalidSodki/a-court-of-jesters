@@ -2,10 +2,11 @@ extends Node
 ## Dev-only: drives the game through key states via the World manager and saves
 ## screenshots. Run: godot --path . res://tools/Screenshotter.tscn
 
-const OUT := "C:/Users/Walid/AppData/Local/Temp/claude/C--GitHub-a-court-of-jesters/bbf61257-a472-4e0f-abaf-a64027053355/scratchpad/"
+const OUT := "res://.captures/"
 
 
 func _ready() -> void:
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT))
 	World.go_to("res://world/GreatHall.tscn")
 	await _wait(0.9)
 	await _shot("01_intro")
@@ -113,5 +114,5 @@ func _shot(name: String) -> void:
 	await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	var img := get_viewport().get_texture().get_image()
-	var err := img.save_png(OUT + name + ".png")
+	var err := img.save_png(ProjectSettings.globalize_path(OUT + name + ".png"))
 	print("shot %s (err %d)" % [name, err])

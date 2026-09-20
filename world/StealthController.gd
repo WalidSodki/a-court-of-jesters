@@ -1,5 +1,5 @@
 class_name StealthController
-extends Node2D
+extends Node
 ## Coordinates a stealth section. It discovers the room's guards, shows one
 ## shared detection meter (the max across guards), and owns the caught outcome —
 ## keeping that logic out of the guards, which only report via signals.
@@ -7,14 +7,12 @@ extends Node2D
 ## Caught outcome (design decision M3): FLAG + RETRY. Getting spotted records a
 ## flag later content can read, then plays a short scare and respawns the player
 ## at the section entrance with the guards reset — no progress is lost.
-##
-## Extends Node2D only so the room scaffolder can place it like any entity; it
-## has no world position of its own (its UI is a screen-space CanvasLayer).
 
 ## Which Spawns/Marker2D to send the player back to when caught.
 @export var respawn_spawn_id: StringName = &"default"
 
 var _guards: Array[Guard] = []
+var _levels: Dictionary = {}   # guard -> its latest detection level (0..1)
 var _level := 0.0
 var _resetting := false
 
@@ -32,16 +30,20 @@ func _ready() -> void:
 func _setup() -> void:
 	for g in get_tree().get_nodes_in_group("guard"):
 		if g is Guard:
-			_guards.append(g)
-			(g as Guard).caught.connect(_on_caught)
+			var guard := g as Guard
+			_guards.append(guard)
+			_levels[guard] = guard.get_detection()
+			guard.caught.connect(_on_caught)
+			guard.detection_changed.connect(_on_guard_detection.bind(guard))
 	_build_ui()
 
 
-func _process(_delta: float) -> void:
+## Driven by each guard's detection_changed — no per-frame polling.
+func _on_guard_detection(level: float, guard: Guard) -> void:
+	_levels[guard] = level
 	var m := 0.0
-	for g in _guards:
-		if is_instance_valid(g):
-			m = maxf(m, g.get_detection())
+	for v in _levels.values():
+		m = maxf(m, v)
 	_level = m
 	_update_meter()
 

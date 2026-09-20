@@ -66,3 +66,16 @@ func play_music(stream: AudioStream) -> void:
 
 func stop_music() -> void:
 	_music_player.stop()
+
+
+func is_music_playing() -> bool:
+	return _music_player.playing
+
+
+## Precise song position for rhythm sync: the stream's playback position adjusted
+## for mix-ahead and output latency. Returns -1.0 when no music is playing.
+func music_position() -> float:
+	if not _music_player.playing:
+		return -1.0
+	return _music_player.get_playback_position() \
+		+ AudioServer.get_time_since_last_mix() - AudioServer.get_output_latency()

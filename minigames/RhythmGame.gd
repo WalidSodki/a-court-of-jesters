@@ -46,14 +46,16 @@ var _judge_label: Label
 
 ## Begin the performance. Safe to call once; pushes MINIGAME control-mode.
 func start(chart: RhythmChart) -> void:
+	if chart == null:
+		push_error("RhythmGame.start() called with a null chart")
+		finished.emit(_result(false))
+		return
 	_chart = chart
 	for n in chart.get_notes():
 		_notes.append({"time": n.time, "lane": n.lane, "judged": false})
 	_build_ui()
 	GameState.push_mode(GameState.Mode.MINIGAME)
 	if chart.music != null:
-		# Placeholder charts have no music; when real music lands, follow the
-		# stream's playback position here instead of the delta clock below.
 		AudioManager.play_music(chart.music)
 	_running = true
 
@@ -61,7 +63,12 @@ func start(chart: RhythmChart) -> void:
 func _process(delta: float) -> void:
 	if not _running:
 		return
-	_song_time += delta
+	# Sync the conductor to the audio clock when a track is playing (rock-solid
+	# timing); otherwise accumulate delta (placeholder charts have no music).
+	if _chart.music != null and AudioManager.is_music_playing():
+		_song_time = AudioManager.music_position()
+	else:
+		_song_time += delta
 	_update_notes()
 	if _song_time >= _chart.length():
 		_finish(false)

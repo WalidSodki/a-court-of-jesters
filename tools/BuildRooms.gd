@@ -61,7 +61,7 @@ func _ready() -> void:
 	_build({
 		"name": "GreatHall",
 		"map": GREAT_HALL_MAP,
-		"floor": 48, "wall": 2,
+		"floor": 48,
 		"night": Color(0.55, 0.52, 0.64),
 		"vignette": 0.5,
 		"play_intro": true,
@@ -89,7 +89,7 @@ func _ready() -> void:
 	_build({
 		"name": "Antechamber",
 		"map": ANTECHAMBER_MAP,
-		"floor": 37, "wall": 2,
+		"floor": 37,
 		"night": Color(0.30, 0.30, 0.44),
 		"vignette": 0.62,
 		"play_intro": false,
@@ -121,7 +121,7 @@ func _ready() -> void:
 	_build({
 		"name": "Passage",
 		"map": _passage_map(),
-		"floor": 37, "wall": 2,
+		"floor": 37,
 		"night": Color(0.24, 0.24, 0.38),
 		"vignette": 0.62,
 		"play_intro": false,
@@ -207,7 +207,7 @@ func _build(def: Dictionary) -> void:
 	wall_layer.collision_enabled = true    # solid: anything painted here blocks
 	root.add_child(wall_layer)
 
-	_paint(floor_layer, wall_layer, def.map, def.floor, def.wall)
+	_paint(floor_layer, wall_layer, def.map, def.floor)
 
 	var vignette := RoomKit.make_vignette(def.vignette)
 	vignette.name = "Vignette"
@@ -219,7 +219,8 @@ func _build(def: Dictionary) -> void:
 	for e in def.entities:
 		var inst: Node = load(e.scene).instantiate()
 		inst.name = e.name
-		inst.position = RoomKit.cell_center(e.cell)
+		if inst is Node2D:
+			(inst as Node2D).position = RoomKit.cell_center(e.cell)
 		for key in e.get("props", {}):
 			inst.set(key, e.props[key])
 		entities.add_child(inst)
@@ -242,15 +243,62 @@ func _build(def: Dictionary) -> void:
 	root.free()
 
 
-func _paint(floor_layer: TileMapLayer, wall_layer: TileMapLayer, map: Array, floor_index: int, wall_index: int) -> void:
+# The grey-brick nine-slice frame in the Kenney sheet (see room-tile-convention).
+const WALL_TL := 1
+const WALL_TOP := 2
+const WALL_TR := 3
+const WALL_LEFT := 13
+const WALL_FILL := 14
+const WALL_RIGHT := 15
+const WALL_BL := 25
+const WALL_BOTTOM := 26
+const WALL_BR := 27
+
+
+func _paint(floor_layer: TileMapLayer, wall_layer: TileMapLayer, map: Array, floor_index: int) -> void:
 	var floor_coords := Vector2i(floor_index % 12, floor_index / 12)
-	var wall_coords := Vector2i(wall_index % 12, wall_index / 12)
 	for y in map.size():
 		var row: String = map[y]
 		for x in row.length():
 			floor_layer.set_cell(Vector2i(x, y), 0, floor_coords)
 			if row[x] == "#":
-				wall_layer.set_cell(Vector2i(x, y), 0, wall_coords)
+				var wi := _wall_tile(map, x, y)
+				wall_layer.set_cell(Vector2i(x, y), 0, Vector2i(wi % 12, wi / 12))
+
+
+## Pick a nine-slice frame tile for a wall cell from which orthogonal neighbours
+## are open floor (corners fall back to the inward diagonal). Enclosed cells and
+## thin/1-wide pillars use the brick fill. NOTE: this is a lightweight autotiler
+## for the placeholder art; when real tiles arrive, TileSet Terrains (authored in
+## BuildTileSet + set_cells_terrain_connect) are the proper Godot way.
+func _wall_tile(map: Array, x: int, y: int) -> int:
+	var up := _open(map, x, y - 1)
+	var down := _open(map, x, y + 1)
+	var left := _open(map, x - 1, y)
+	var right := _open(map, x + 1, y)
+	var n := int(up) + int(down) + int(left) + int(right)
+	if n == 1:
+		if down: return WALL_TOP
+		if up: return WALL_BOTTOM
+		if right: return WALL_LEFT
+		return WALL_RIGHT
+	if n == 0:
+		if _open(map, x + 1, y + 1): return WALL_TL
+		if _open(map, x - 1, y + 1): return WALL_TR
+		if _open(map, x + 1, y - 1): return WALL_BL
+		if _open(map, x - 1, y - 1): return WALL_BR
+	return WALL_FILL
+
+
+## True if (x,y) is in bounds and NOT a wall. Out-of-bounds counts as solid, so
+## the frame closes cleanly at the map edge.
+func _open(map: Array, x: int, y: int) -> bool:
+	if y < 0 or y >= map.size():
+		return false
+	var row: String = map[y]
+	if x < 0 or x >= row.length():
+		return false
+	return row[x] != "#"
 
 
 ## Every tool-created node must be owned by the scene root to be saved. Instanced

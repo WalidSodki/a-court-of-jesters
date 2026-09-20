@@ -2,10 +2,11 @@ extends Node
 ## Dev-only: renders every tile in the placeholder sheet with its index label,
 ## screenshots it, and quits. Lets us pick correct tile indices by eye.
 
-const OUT := "C:/Users/Walid/AppData/Local/Temp/claude/C--GitHub-a-court-of-jesters/bbf61257-a472-4e0f-abaf-a64027053355/scratchpad/"
+const OUT := "res://.captures/"
 
 
 func _ready() -> void:
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(OUT))
 	# Use real window pixels so the contact sheet is large and readable.
 	get_window().content_scale_mode = Window.CONTENT_SCALE_MODE_DISABLED
 	get_window().size = Vector2i(1024, 960)
@@ -46,6 +47,7 @@ func _ready() -> void:
 	await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	var img := get_viewport().get_texture().get_image()
-	var err := img.save_png(OUT + "atlas.png")
-	print("atlas -> %s (err %d) size=%s" % [OUT + "atlas.png", err, img.get_size()])
+	var out_path := ProjectSettings.globalize_path(OUT + "atlas.png")
+	var err := img.save_png(out_path)
+	print("atlas -> %s (err %d) size=%s" % [out_path, err, img.get_size()])
 	get_tree().quit()
