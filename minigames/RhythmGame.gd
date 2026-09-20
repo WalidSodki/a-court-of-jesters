@@ -6,16 +6,17 @@ extends Node
 ## pops it again through the single `_finish()` path, like `cutscene/Cutscene.gd`)
 ## and reports its result via `finished` — the launcher/room never reaches
 ## inside it. Content is a `RhythmChart` Resource, so new performances are data,
-## not code. Notes fall down four lanes hit with the movement directions
-## (`move_left/up/down/right`), so it's controller-first with no new input map.
+## not code. Notes fall down four lanes hit with the movement directions in
+## classic DDR order — Left, Down, Up, Right — so it's controller-first with no
+## new input map.
 ##
 ## Usage: see `minigames/Performance.gd`.
 
 signal finished(result: Dictionary)
 
-# Lane 0..3 map to the four movement directions, laid out left-to-right.
-const LANE_ACTIONS: Array[StringName] = [&"move_left", &"move_up", &"move_down", &"move_right"]
-const LANE_GLYPHS: Array[String] = ["<", "^", "v", ">"]
+# Lane 0..3, laid out left-to-right in DDR panel order: Left, Down, Up, Right.
+const LANE_ACTIONS: Array[StringName] = [&"move_left", &"move_down", &"move_up", &"move_right"]
+const LANE_GLYPHS: Array[String] = ["<", "v", "^", ">"]
 const LANE_COLORS: Array[Color] = [
 	Color(0.95, 0.55, 0.35), Color(0.95, 0.82, 0.40),
 	Color(0.55, 0.85, 0.60), Color(0.55, 0.70, 0.95),
