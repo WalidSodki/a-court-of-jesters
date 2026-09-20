@@ -56,6 +56,26 @@ const PASSAGE_H := 12
 const PASSAGE_GUARD_COLS := [6, 11, 16, 21, 26, 31, 36]
 const PASSAGE_PILLAR_COLS := [9, 34]
 
+# Flee lane: a long open corridor. Enter left, a threat starts just behind you,
+# outrun it to the exit door on the right. Deliberately open (no interior pillars)
+# so the straight-line chaser reads fair and never wedges — see Chaser.gd.
+const CHASE_W := 40
+const CHASE_H := 11
+
+# The closing throne room (a small chamber; the outro cutscene carries the beat).
+const FINALE_MAP := [
+	"###############",
+	"#.............#",
+	"#.............#",
+	"#.............#",
+	"#.............#",
+	"#.............#",
+	"#.............#",
+	"#.............#",
+	"#.............#",
+	"###############",
+]
+
 
 func _ready() -> void:
 	_build({
@@ -129,8 +149,65 @@ func _ready() -> void:
 		"entities": _passage_entities(),
 	})
 
+	_build({
+		"name": "Chase",
+		"map": _chase_map(),
+		"floor": 37,
+		"night": Color(0.20, 0.18, 0.30),
+		"vignette": 0.66,
+		"play_intro": false,
+		"spawns": {"default": Vector2i(5, 5)},
+		"entities": _chase_entities(),
+	})
+
+	_build({
+		"name": "Finale",
+		"map": FINALE_MAP,
+		"floor": 48,
+		"night": Color(0.50, 0.46, 0.60),
+		"vignette": 0.5,
+		"play_intro": false,
+		"script": "res://world/Finale.gd",
+		"spawns": {"default": Vector2i(7, 8)},
+		"entities": [
+			{"scene": "res://entities/Torch.tscn", "name": "TorchLeft", "cell": Vector2i(4, 1),
+				"props": {"lit": true}},
+			{"scene": "res://entities/Torch.tscn", "name": "TorchRight", "cell": Vector2i(10, 1),
+				"props": {"lit": true}},
+		],
+	})
+
 	print("Rooms built.")
 	get_tree().quit()
+
+
+## The open flee corridor as an ASCII map: solid border, clear interior.
+func _chase_map() -> Array:
+	var rows: Array = []
+	for y in CHASE_H:
+		var s := ""
+		for x in CHASE_W:
+			var solid := x == 0 or x == CHASE_W - 1 or y == 0 or y == CHASE_H - 1
+			s += "#" if solid else "."
+		rows.append(s)
+	return rows
+
+
+## ChaseController + one Chaser starting a few tiles behind the entry spawn + the
+## exit door (to the Finale) + torches. Escaping = reaching the exit door.
+func _chase_entities() -> Array:
+	return [
+		{"scene": "res://entities/ChaseController.tscn", "name": "Chase", "cell": Vector2i(1, 1),
+			"props": {"respawn_spawn_id": &"default"}},
+		{"scene": "res://entities/Chaser.tscn", "name": "Chaser", "cell": Vector2i(2, 5),
+			"props": {"speed": 82.0, "catch_distance": 12.0, "danger_distance": 90.0, "start_delay": 0.9}},
+		{"scene": "res://entities/Door.tscn", "name": "ExitDoor", "cell": Vector2i(CHASE_W - 2, 5),
+			"props": {"target_scene": "res://world/Finale.tscn", "spawn_id": &"default", "prompt": "Escape"}},
+		{"scene": "res://entities/Torch.tscn", "name": "TorchStart", "cell": Vector2i(2, 1),
+			"props": {"lit": true}},
+		{"scene": "res://entities/Torch.tscn", "name": "TorchEnd", "cell": Vector2i(CHASE_W - 3, 1),
+			"props": {"lit": true}},
+	]
 
 
 ## The long stealth corridor as an ASCII map: solid border, plus 2-tall cover
@@ -188,6 +265,9 @@ func _build(def: Dictionary) -> void:
 	var tile_set: TileSet = load(TILESET)
 	var root := Room.new()
 	root.name = def.name
+	# Rooms with extra behaviour use a Room subclass (e.g. Finale.gd's outro).
+	if def.has("script"):
+		root.set_script(load(def.script))
 	root.play_intro = def.get("play_intro", false)
 
 	var night := CanvasModulate.new()

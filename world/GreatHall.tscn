@@ -70,6 +70,13 @@ position = Vector2(40, 24)
 target_scene = "res://world/Antechamber.tscn"
 spawn_id = &"from_hall"
 
+[node name="DoorToPassage" parent="Entities" unique_id=812340001 instance=ExtResource("12_ufc7j")]
+position = Vector2(280, 24)
+target_scene = "res://world/Passage.tscn"
+spawn_id = &"default"
+require_flag = "performance_done"
+prompt = "Slip backstage"
+
 [node name="TorchLeft" parent="Entities" unique_id=248734423 instance=ExtResource("14_io07j")]
 position = Vector2(104, 24)
 

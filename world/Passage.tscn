@@ -121,8 +121,8 @@ position = Vector2(696, 104)
 collision_layer = 2
 collision_mask = 0
 script = ExtResource("8_u21kb")
-target_scene = "res://world/GreatHall.tscn"
-spawn_id = &"from_antechamber"
+target_scene = "res://world/Chase.tscn"
+spawn_id = &"default"
 prompt = "Slip out"
 
 [node name="TorchStart" type="Node2D" parent="Entities" unique_id=56339725 instance=ExtResource("9_8xsqm")]

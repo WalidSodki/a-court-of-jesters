@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://world/Chaser.gd" id="1"]
+[ext_resource type="Texture2D" path="res://art/royalty free placeholder/Tilemap/tilemap_packed.png" id="2"]
+
+[node name="Chaser" type="Node2D"]
+script = ExtResource("1")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+texture = ExtResource("2")
+region_enabled = true
+region_rect = Rect2(16, 160, 16, 16)
+position = Vector2(0, -3)
