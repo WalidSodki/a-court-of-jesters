@@ -44,22 +44,17 @@ const ANTECHAMBER_MAP := [
 	"#############",
 ]
 
-# Stealth corridor: enter bottom, reach the exit door at the top past two
-# patrolling guards, using the wall pillars as cover to break their sight lines.
-const PASSAGE_MAP := [
-	"####################",
-	"#..................#",
-	"#..................#",
-	"#....##......##....#",
-	"#..................#",
-	"#..................#",
-	"#....##......##....#",
-	"#..................#",
-	"#..................#",
-	"#..................#",
-	"#..................#",
-	"####################",
-]
+# Stealth gauntlet: a long horizontal corridor. Enter left, reach the exit door
+# on the right past a line of guards that sweep vertically on fixed paths — a
+# predictable rhythm of moving sight-cones to time your dashes through. Two cover
+# pillars give mid-corridor hiding spots. Built in code so the wide grid can't be
+# miscounted; see _passage_map().
+const PASSAGE_W := 45
+const PASSAGE_H := 12
+# Guard lanes (columns) and cover-pillar columns are kept disjoint so a guard
+# never patrols into a pillar.
+const PASSAGE_GUARD_COLS := [6, 11, 16, 21, 26, 31, 36]
+const PASSAGE_PILLAR_COLS := [9, 34]
 
 
 func _ready() -> void:
@@ -125,30 +120,63 @@ func _ready() -> void:
 
 	_build({
 		"name": "Passage",
-		"map": PASSAGE_MAP,
+		"map": _passage_map(),
 		"floor": 37, "wall": 2,
-		"night": Color(0.26, 0.26, 0.40),
+		"night": Color(0.24, 0.24, 0.38),
 		"vignette": 0.62,
 		"play_intro": false,
-		"spawns": {"default": Vector2i(10, 10), "from_hall": Vector2i(10, 10)},
-		"entities": [
-			{"scene": "res://entities/StealthController.tscn", "name": "Stealth", "cell": Vector2i(1, 1),
-				"props": {"respawn_spawn_id": &"default"}},
-			{"scene": "res://entities/Guard.tscn", "name": "Guard1", "cell": Vector2i(5, 4),
-				"props": {"patrol_points": PackedVector2Array([Vector2(0, 0), Vector2(144, 0)])}},
-			{"scene": "res://entities/Guard.tscn", "name": "Guard2", "cell": Vector2i(14, 7),
-				"props": {"patrol_points": PackedVector2Array([Vector2(0, 0), Vector2(-144, 0)])}},
-			{"scene": "res://entities/Door.tscn", "name": "ExitDoor", "cell": Vector2i(10, 1),
-				"props": {"target_scene": "res://world/GreatHall.tscn", "spawn_id": &"from_antechamber", "prompt": "Slip out"}},
-			{"scene": "res://entities/Torch.tscn", "name": "TorchLeft", "cell": Vector2i(2, 1),
-				"props": {"lit": true}},
-			{"scene": "res://entities/Torch.tscn", "name": "TorchRight", "cell": Vector2i(17, 1),
-				"props": {"lit": true}},
-		],
+		"spawns": {"default": Vector2i(2, 6), "from_hall": Vector2i(2, 6)},
+		"entities": _passage_entities(),
 	})
 
 	print("Rooms built.")
 	get_tree().quit()
+
+
+## The long stealth corridor as an ASCII map: solid border, plus 2-tall cover
+## pillars in the pillar columns. Guard lanes are left clear.
+func _passage_map() -> Array:
+	var rows: Array = []
+	for y in PASSAGE_H:
+		var s := ""
+		for x in PASSAGE_W:
+			var solid := x == 0 or x == PASSAGE_W - 1 or y == 0 or y == PASSAGE_H - 1
+			if x in PASSAGE_PILLAR_COLS and (y == 5 or y == 6):
+				solid = true
+			s += "#" if solid else "."
+		rows.append(s)
+	return rows
+
+
+## StealthController + a line of vertically-sweeping guards (alternating start
+## phase so gaps form a rhythm) + the exit door + torches.
+func _passage_entities() -> Array:
+	var sweep := Vector2(0, 7 * 16)   # patrol height: rows 2..9
+	var ents: Array = [
+		{"scene": "res://entities/StealthController.tscn", "name": "Stealth", "cell": Vector2i(1, 1),
+			"props": {"respawn_spawn_id": &"default"}},
+	]
+	for i in PASSAGE_GUARD_COLS.size():
+		var col: int = PASSAGE_GUARD_COLS[i]
+		var top_start := i % 2 == 0                      # alternate phase
+		var start_row := 2 if top_start else 9
+		var offset := sweep if top_start else -sweep     # first leg direction
+		ents.append({
+			"scene": "res://entities/Guard.tscn", "name": "Guard%d" % (i + 1),
+			"cell": Vector2i(col, start_row),
+			"props": {
+				"patrol_points": PackedVector2Array([Vector2.ZERO, offset]),
+				"speed": 32.0, "wait_time": 0.4,
+				"view_distance": 68.0, "view_angle_deg": 64.0,
+			},
+		})
+	ents.append({"scene": "res://entities/Door.tscn", "name": "ExitDoor", "cell": Vector2i(PASSAGE_W - 2, 6),
+		"props": {"target_scene": "res://world/GreatHall.tscn", "spawn_id": &"from_antechamber", "prompt": "Slip out"}})
+	ents.append({"scene": "res://entities/Torch.tscn", "name": "TorchStart", "cell": Vector2i(2, 1),
+		"props": {"lit": true}})
+	ents.append({"scene": "res://entities/Torch.tscn", "name": "TorchEnd", "cell": Vector2i(PASSAGE_W - 3, 1),
+		"props": {"lit": true}})
+	return ents
 
 
 func _build(def: Dictionary) -> void:
