@@ -6,14 +6,18 @@ extends Interactable
 
 @export var required_item: ItemData
 @export var flag: String = "stage_ready"
+## The performance played when the stage is ready. Data-driven; assign in the
+## inspector (e.g. res://minigames/charts/court_debut.tres).
+@export var chart: RhythmChart
 var done := false
+var performed := false
 
 signal completed
 
 
 func _on_interact(_by: Node) -> void:
 	if done:
-		Dialogue.start([{"text": "The stage is set. The court is waiting."}])
+		await _perform()
 		return
 
 	# "Use item on world object": prefer the explicitly held item, but accept
@@ -24,6 +28,7 @@ func _on_interact(_by: Node) -> void:
 		return
 
 	done = true
+	prompt = "Perform"
 	if Inventory.has(required_item):
 		Inventory.remove(required_item)
 	GameState.set_flag(flag, true)
@@ -39,6 +44,44 @@ func _on_interact(_by: Node) -> void:
 	if not impressed:
 		line = "You set the %s upon the stage. The court quiets — the steward watches, unamused." % required_item.display_name
 	Dialogue.start([{"text": line}])
+
+
+## Launch the rhythm minigame, then play a reaction that branches on the earlier
+## steward choice and the score. Consequences go through GameState flags.
+func _perform() -> void:
+	if performed:
+		Dialogue.start([{"text": "The court still hums with talk of your performance."}])
+		return
+	if chart == null:
+		Dialogue.start([{"text": "The stage is set. The court is waiting."}])
+		return
+	performed = true
+	var result := await Perform.run(chart)
+	GameState.set_flag("performance_done", true)
+	GameState.set_flag("performance_tier", result.tier)
+	await Cutscene.play(func() -> void:
+		Dialogue.start(_reaction_lines(GameState.has_flag("steward_impressed"), result.tier))
+		await Dialogue.finished
+	)
+
+
+func _reaction_lines(impressed: bool, tier: String) -> Array:
+	var reactions := {
+		"great": {
+			true: "The royal family rises, delighted — the steward permits himself a thin, approving smile.",
+			false: "The court gasps, then roars with laughter. Even the doubting steward cannot hide his surprise.",
+		},
+		"pass": {
+			true: "Polite applause ripples through the hall. The steward gives a small, satisfied nod.",
+			false: "A scattering of claps. The steward's eyes narrow — you have not yet won this house.",
+		},
+		"flop": {
+			true: "The music falters and dies. The steward looks away, disappointed he vouched for you.",
+			false: "Silence, then a single cruel snicker from the gallery. The steward has seen enough.",
+		},
+	}
+	var tier_lines: Dictionary = reactions.get(tier, reactions["pass"])
+	return [{"text": String(tier_lines[impressed])}]
 
 
 func _flourish() -> void:

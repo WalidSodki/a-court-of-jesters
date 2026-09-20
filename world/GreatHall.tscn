@@ -10,6 +10,7 @@
 [ext_resource type="Resource" path="res://items/baton.tres" id="11_s6bcg"]
 [ext_resource type="PackedScene" path="res://entities/Door.tscn" id="12_ufc7j"]
 [ext_resource type="PackedScene" path="res://entities/Torch.tscn" id="14_io07j"]
+[ext_resource type="Resource" path="res://minigames/charts/court_debut.tres" id="16_chart"]
 
 [sub_resource type="Gradient" id="Gradient_iexnc"]
 offsets = PackedFloat32Array(0.45, 1)
@@ -62,6 +63,7 @@ item = ExtResource("8_lcmas")
 [node name="Pedestal" parent="Entities" unique_id=65546105 instance=ExtResource("9_qbeej")]
 position = Vector2(264, 56)
 required_item = ExtResource("11_s6bcg")
+chart = ExtResource("16_chart")
 
 [node name="DoorToAntechamber" parent="Entities" unique_id=642341811 instance=ExtResource("12_ufc7j")]
 position = Vector2(40, 24)

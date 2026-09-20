@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="RhythmChart" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://minigames/RhythmChart.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+title = "The Court Debut"
+bpm = 110.0
+step_beats = 0.5
+lead_in = 2.0
+pattern = PackedInt32Array(0, -1, 1, -1, 2, -1, 3, -1, 0, 1, 2, 3, 0, -1, 3, -1, 1, 2, 1, 2, 0, -1, 3, -1, 3, 2, 1, 0, 0, 1, 2, 3)
+approach = 1.4
+perfect_window = 0.07
+good_window = 0.15

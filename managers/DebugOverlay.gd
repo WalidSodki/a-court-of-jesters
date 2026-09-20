@@ -5,6 +5,7 @@ extends Node
 ## Hotkeys while visible:
 ##   1/2/3  grant Bells / Stick / Marotte
 ##   5/6    set steward_impressed true / false
+##   7      jump straight into the court performance (rhythm minigame)
 ##   8      play the intro cutscene
 ##   9      toggle player noclip
 ##   0      reload the room
@@ -14,6 +15,7 @@ const ITEM_PATHS := {
 	KEY_2: "res://items/stick.tres",
 	KEY_3: "res://items/baton.tres",
 }
+const PERFORM_CHART := preload("res://minigames/charts/court_debut.tres")
 
 var _canvas: CanvasLayer
 var _label: Label
@@ -55,7 +57,7 @@ func _process(_delta: float) -> void:
 		return
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	var pos := player.global_position if player != null else Vector2.ZERO
-	_label.text = "DEBUG  (F1)\nmode: %s\nfps: %d\npos: %d, %d\nnoclip: %s\nflags: %s\nitems: %s\nheld: %s\n[1/2/3] give  [5/6] steward  [8] intro  [9] noclip  [0] reload" % [
+	_label.text = "DEBUG  (F1)\nmode: %s\nfps: %d\npos: %d, %d\nnoclip: %s\nflags: %s\nitems: %s\nheld: %s\n[1/2/3] give  [5/6] steward  [7] perform  [8] intro  [9] noclip  [0] reload" % [
 		GameState.mode_name(),
 		Engine.get_frames_per_second(),
 		pos.x, pos.y,
@@ -82,6 +84,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		GameState.set_flag("steward_impressed", true)
 	elif key == KEY_6:
 		GameState.set_flag("steward_impressed", false)
+	elif key == KEY_7:
+		if GameState.mode != GameState.Mode.MINIGAME:
+			GameState.set_flag("stage_ready", true)
+			await Perform.run(PERFORM_CHART)
 	elif key == KEY_8:
 		var room := get_tree().get_first_node_in_group("room")
 		if room != null and room.has_method("trigger_intro"):
