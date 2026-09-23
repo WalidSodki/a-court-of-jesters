@@ -7,6 +7,8 @@ extends Interactable
 @export var speaker: String = ""
 @export_multiline var lines: PackedStringArray
 @export var set_story_flag: String = ""
+## Optional clue added to the journal the first time this is examined.
+@export var grant_clue: ClueData
 @export var camera_shake: float = 0.0
 @export var sfx: StringName = &""
 
@@ -20,6 +22,8 @@ func _on_interact(_by: Node) -> void:
 		AudioManager.play_sfx(sfx)
 	if set_story_flag != "":
 		GameState.set_flag(set_story_flag, true)
+	if grant_clue != null:
+		Clues.discover(grant_clue)
 
 	var seq: Array = []
 	for line in lines:

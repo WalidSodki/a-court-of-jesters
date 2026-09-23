@@ -12,6 +12,8 @@ extends Node
 ##   0      reload the room
 ##   C      jump to the Chase (flee section)
 ##   V      jump to the Finale (reaction cutscene)
+##   R      reset the run (clear flags + items + clues, reload) — replays intro
+##          and re-arms one-shot/flag-gated dialogue so branches are easy to test
 
 const ITEM_PATHS := {
 	KEY_1: "res://items/bells.tres",
@@ -50,6 +52,10 @@ func _build_ui() -> void:
 	_label = Label.new()
 	_label.add_theme_font_size_override("font_size", 7)
 	_label.add_theme_color_override("font_color", Color(0.6, 1, 0.7))
+	# Wrap within a bounded width so the hotkey legend and growing flag/clue
+	# lists never run off the 320px viewport.
+	_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_label.custom_minimum_size = Vector2(300, 0)
 	panel.add_child(_label)
 
 	_canvas.visible = false
@@ -60,7 +66,7 @@ func _process(_delta: float) -> void:
 		return
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	var pos := player.global_position if player != null else Vector2.ZERO
-	_label.text = "DEBUG  (F1)\nmode: %s\nfps: %d\npos: %d, %d\nnoclip: %s\nflags: %s\nitems: %s\nheld: %s\n[1/2/3] give  [4] passage  [C] chase  [V] finale  [5/6] steward  [7] perform  [8] intro  [9] noclip  [0] reload" % [
+	_label.text = "DEBUG  (F1 / Esc)\nmode: %s\nfps: %d\npos: %d, %d\nnoclip: %s\nflags: %s\nitems: %s\nheld: %s\nclues: %s\n[1/2/3] give  [4] passage  [C] chase  [V] finale  [5/6] steward\n[7] perform  [8] intro  [9] noclip  [0] reload  [R] reset" % [
 		GameState.mode_name(),
 		Engine.get_frames_per_second(),
 		pos.x, pos.y,
@@ -68,6 +74,7 @@ func _process(_delta: float) -> void:
 		str(GameState.story_flags),
 		str(_item_ids()),
 		Inventory.held_item.display_name if Inventory.held_item != null else "-",
+		str(_clue_ids()),
 	]
 
 
@@ -105,6 +112,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_toggle_noclip()
 	elif key == KEY_0:
 		World.reload()
+	elif key == KEY_R:
+		_reset_run()
 
 
 func _toggle_noclip() -> void:
@@ -114,8 +123,26 @@ func _toggle_noclip() -> void:
 		player.collision_mask = 0 if _noclip else 1
 
 
+## Wipe all persistent state and reload, so a branch can be replayed from scratch.
+func _reset_run() -> void:
+	GameState.story_flags.clear()
+	Inventory.items.clear()
+	Inventory.held_item = null
+	Inventory.changed.emit()
+	Clues.discovered.clear()
+	Clues.changed.emit()
+	World.reload()
+
+
 func _item_ids() -> Array:
 	var ids: Array = []
 	for it in Inventory.items:
 		ids.append(String(it.id))
+	return ids
+
+
+func _clue_ids() -> Array:
+	var ids: Array = []
+	for c in Clues.discovered:
+		ids.append(String(c.id))
 	return ids

@@ -6,6 +6,8 @@
 [ext_resource type="PackedScene" path="res://entities/Ghost.tscn" id="5_vb8rj"]
 [ext_resource type="PackedScene" path="res://entities/ExamineSpot.tscn" id="7_4si2d"]
 [ext_resource type="PackedScene" path="res://entities/Torch.tscn" id="8_m4pje"]
+[ext_resource type="Resource" path="res://clues/watching_presence.tres" id="9_ghost"]
+[ext_resource type="Resource" path="res://clues/missing_predecessor.tres" id="10_note"]
 
 [sub_resource type="Gradient" id="Gradient_civ6f"]
 offsets = PackedFloat32Array(0.45, 1)
@@ -56,6 +58,7 @@ prompt = "Return to hall"
 position = Vector2(104, 72)
 speaker = "?"
 lines = PackedStringArray("A cold shape lingers by the wall. It watches you rehearse... and says nothing.")
+grant_clue = ExtResource("9_ghost")
 camera_shake = 2.0
 sfx = &"error"
 
@@ -63,6 +66,7 @@ sfx = &"error"
 position = Vector2(168, 120)
 lines = PackedStringArray("A torn note, the ink smeared:", "\"The last jester made the king laugh. Then he was never seen to leave. Mind which laughs you earn.\"")
 set_story_flag = "read_note"
+grant_clue = ExtResource("10_note")
 prompt = "Read"
 
 [node name="TorchLeft" parent="Entities" unique_id=1011208782 instance=ExtResource("8_m4pje")]

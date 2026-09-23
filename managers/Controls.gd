@@ -22,14 +22,17 @@ func _ready() -> void:
 	# Open the inventory.
 	_action("inventory", [_key(KEY_TAB), _key(KEY_I)], [_btn(JOY_BUTTON_Y)])
 
+	# Open the journal (discovered clues).
+	_action("journal", [_key(KEY_J)], [_btn(JOY_BUTTON_X)])
+
 	# Back / close menus.
 	_action("cancel", [_key(KEY_BACKSPACE)], [_btn(JOY_BUTTON_B)])
 
 	# Pause.
 	_action("pause", [_key(KEY_ESCAPE)], [_btn(JOY_BUTTON_START)])
 
-	# Developer overlay toggle.
-	_action("debug_toggle", [_key(KEY_F1)], [_btn(JOY_BUTTON_BACK)])
+	# Developer overlay toggle (Escape included for now, alongside F1).
+	_action("debug_toggle", [_key(KEY_F1), _key(KEY_ESCAPE)], [_btn(JOY_BUTTON_BACK)])
 
 
 func _action(name: String, keys: Array, buttons: Array, motions: Array = []) -> void:

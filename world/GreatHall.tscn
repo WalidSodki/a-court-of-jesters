@@ -4,6 +4,7 @@
 [ext_resource type="TileSet" uid="uid://8b1d7n7q0kvp" path="res://world/tileset/court_tileset.tres" id="2_0nitq"]
 [ext_resource type="PackedScene" path="res://entities/Steward.tscn" id="3_fdh3r"]
 [ext_resource type="Resource" path="res://items/stick.tres" id="5_ks0mm"]
+[ext_resource type="Resource" path="res://dialogue/conversations/steward_intro.tres" id="4_stwrd"]
 [ext_resource type="PackedScene" path="res://entities/Chest.tscn" id="6_w8p6p"]
 [ext_resource type="Resource" path="res://items/bells.tres" id="8_lcmas"]
 [ext_resource type="PackedScene" path="res://entities/Pedestal.tscn" id="9_qbeej"]
@@ -54,6 +55,7 @@ texture = SubResource("GradientTexture2D_4wreh")
 
 [node name="Steward" parent="Entities" unique_id=1391488548 instance=ExtResource("3_fdh3r")]
 position = Vector2(168, 56)
+conversation = ExtResource("4_stwrd")
 gift_item = ExtResource("5_ks0mm")
 
 [node name="Chest" parent="Entities" unique_id=1416807811 instance=ExtResource("6_w8p6p")]

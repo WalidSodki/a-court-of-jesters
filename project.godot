@@ -21,11 +21,13 @@ config/icon="res://icon.svg"
 Controls="*res://managers/Controls.gd"
 GameState="*res://managers/GameState.gd"
 Inventory="*res://managers/Inventory.gd"
+Clues="*res://managers/Clues.gd"
 AudioManager="*res://managers/AudioManager.gd"
 Transitions="*res://managers/Transitions.gd"
 World="*res://managers/World.gd"
 Dialogue="*res://managers/DialogueManager.gd"
 InventoryScreen="*res://ui/InventoryUI.gd"
+JournalScreen="*res://ui/JournalUI.gd"
 Debug="*res://managers/DebugOverlay.gd"
 
 [display]
