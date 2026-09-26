@@ -1,122 +1,101 @@
-[gd_resource type="Resource" script_class="ConversationData" load_steps=21 format=3]
+[gd_resource type="Resource" script_class="ConversationData" format=3 uid="uid://81rw16761hg7"]
 
-[ext_resource type="Script" path="res://dialogue/ConversationData.gd" id="1"]
-[ext_resource type="Script" path="res://dialogue/DialogueNode.gd" id="2"]
-[ext_resource type="Script" path="res://dialogue/DialogueChoice.gd" id="3"]
-[ext_resource type="Script" path="res://dialogue/DialogueEffect.gd" id="4"]
-[ext_resource type="Script" path="res://dialogue/DialogueCondition.gd" id="5"]
+[ext_resource type="Script" uid="uid://bl5yfo5jrtlrh" path="res://dialogue/ConversationData.gd" id="1"]
+[ext_resource type="Script" uid="uid://bth77wsbfl4hc" path="res://dialogue/DialogueNode.gd" id="2"]
+[ext_resource type="Script" uid="uid://kygojdubnmf5" path="res://dialogue/DialogueChoice.gd" id="3"]
+[ext_resource type="Script" uid="uid://cpmjakess2ynw" path="res://dialogue/DialogueEffect.gd" id="4"]
+[ext_resource type="Script" uid="uid://bp56hl6clr1et" path="res://clues/ClueData.gd" id="4_qg4d4"]
+[ext_resource type="Script" uid="uid://d8tu5ctfxtu7" path="res://dialogue/DialogueCondition.gd" id="5"]
+[ext_resource type="Script" uid="uid://d3sri681dk07x" path="res://items/ItemData.gd" id="5_2o8xw"]
 [ext_resource type="Resource" path="res://items/stick.tres" id="6"]
 
-[sub_resource type="Resource" script_class="DialogueCondition" id="Cond_return_impressed"]
+[sub_resource type="Resource" id="Cond_return_impressed"]
 script = ExtResource("5")
 flags_set = Array[StringName]([&"met_steward", &"steward_impressed"])
-flags_unset = Array[StringName]([])
-flag_equals = {}
-has_items = Array[StringName]([])
-has_clues = Array[StringName]([])
 
-[sub_resource type="Resource" script_class="DialogueCondition" id="Cond_return_default"]
-script = ExtResource("5")
-flags_set = Array[StringName]([&"met_steward"])
-flags_unset = Array[StringName]([&"steward_impressed"])
-flag_equals = {}
-has_items = Array[StringName]([])
-has_clues = Array[StringName]([])
-
-[sub_resource type="Resource" script_class="DialogueCondition" id="Cond_intro"]
-script = ExtResource("5")
-flags_set = Array[StringName]([])
-flags_unset = Array[StringName]([&"met_steward"])
-flag_equals = {}
-has_items = Array[StringName]([])
-has_clues = Array[StringName]([])
-
-[sub_resource type="Resource" script_class="DialogueEffect" id="Eff_intro"]
-script = ExtResource("4")
-set_flags = {
-"met_steward": true
-}
-grant_items = Array[ItemData]([])
-discover_clues = Array[ClueData]([])
-
-[sub_resource type="Resource" script_class="DialogueEffect" id="Eff_bow"]
-script = ExtResource("4")
-set_flags = {
-"steward_impressed": true
-}
-grant_items = Array[ItemData]([])
-discover_clues = Array[ClueData]([])
-
-[sub_resource type="Resource" script_class="DialogueEffect" id="Eff_smirk"]
-script = ExtResource("4")
-set_flags = {
-"steward_impressed": false
-}
-grant_items = Array[ItemData]([])
-discover_clues = Array[ClueData]([])
-
-[sub_resource type="Resource" script_class="DialogueEffect" id="Eff_gift"]
-script = ExtResource("4")
-set_flags = {}
-grant_items = Array[ItemData]([ExtResource("6")])
-discover_clues = Array[ClueData]([])
-
-[sub_resource type="Resource" script_class="DialogueChoice" id="Choice_bow"]
-script = ExtResource("3")
-text = "Bow deeply and promise a grand show."
-effect = SubResource("Eff_bow")
-goto = &"n_gift"
-
-[sub_resource type="Resource" script_class="DialogueChoice" id="Choice_smirk"]
-script = ExtResource("3")
-text = "Smirk and juggle an imaginary crown."
-effect = SubResource("Eff_smirk")
-goto = &"n_gift"
-
-[sub_resource type="Resource" script_class="DialogueNode" id="Node_return_impressed"]
+[sub_resource type="Resource" id="Node_return_impressed"]
 script = ExtResource("2")
 id = &"n_return_impressed"
 speaker = "Steward"
 text = "Make them laugh, jester."
 condition = SubResource("Cond_return_impressed")
-choices = Array[DialogueChoice]([])
 goto = &"end"
 
-[sub_resource type="Resource" script_class="DialogueNode" id="Node_return_default"]
+[sub_resource type="Resource" id="Cond_return_default"]
+script = ExtResource("5")
+flags_set = Array[StringName]([&"met_steward"])
+flags_unset = Array[StringName]([&"steward_impressed"])
+
+[sub_resource type="Resource" id="Node_return_default"]
 script = ExtResource("2")
 id = &"n_return_default"
 speaker = "Steward"
 text = "Do not embarrass this house, fool."
 condition = SubResource("Cond_return_default")
-choices = Array[DialogueChoice]([])
 goto = &"end"
 
-[sub_resource type="Resource" script_class="DialogueNode" id="Node_intro"]
+[sub_resource type="Resource" id="Cond_intro"]
+script = ExtResource("5")
+flags_unset = Array[StringName]([&"met_steward"])
+
+[sub_resource type="Resource" id="Eff_intro"]
+script = ExtResource("4")
+set_flags = {
+"met_steward": true
+}
+
+[sub_resource type="Resource" id="Node_intro"]
 script = ExtResource("2")
 id = &"n_intro"
 speaker = "Steward"
 text = "So. You are the new jester. The royal family expects a performance tonight."
 condition = SubResource("Cond_intro")
 effect = SubResource("Eff_intro")
-choices = Array[DialogueChoice]([])
 
-[sub_resource type="Resource" script_class="DialogueNode" id="Node_present"]
+[sub_resource type="Resource" id="Eff_bow"]
+script = ExtResource("4")
+set_flags = {
+"steward_impressed": true
+}
+
+[sub_resource type="Resource" id="Choice_bow"]
+script = ExtResource("3")
+text = "Bow deeply and promise a grand show."
+effect = SubResource("Eff_bow")
+goto = &"n_gift"
+
+[sub_resource type="Resource" id="Eff_smirk"]
+script = ExtResource("4")
+set_flags = {
+"steward_impressed": false
+}
+
+[sub_resource type="Resource" id="Choice_smirk"]
+script = ExtResource("3")
+text = "Smirk and juggle an imaginary crown."
+effect = SubResource("Eff_smirk")
+goto = &"n_gift"
+
+[sub_resource type="Resource" id="Node_present"]
 script = ExtResource("2")
 id = &"n_present"
 speaker = "Steward"
 text = "How will you present yourself to the court?"
-choices = Array[DialogueChoice]([SubResource("Choice_bow"), SubResource("Choice_smirk")])
+choices = Array[ExtResource("3")]([SubResource("Choice_bow"), SubResource("Choice_smirk")])
 
-[sub_resource type="Resource" script_class="DialogueNode" id="Node_gift"]
+[sub_resource type="Resource" id="Eff_gift"]
+script = ExtResource("4")
+grant_items = Array[ExtResource("5_2o8xw")]([ExtResource("6")])
+
+[sub_resource type="Resource" id="Node_gift"]
 script = ExtResource("2")
 id = &"n_gift"
 speaker = "Steward"
 text = "Take this baton handle. Find your bells, make them one, and ready yourself at the stage."
 effect = SubResource("Eff_gift")
-choices = Array[DialogueChoice]([])
 goto = &"end"
 
 [resource]
 script = ExtResource("1")
 id = &"steward_intro"
-nodes = Array[DialogueNode]([SubResource("Node_return_impressed"), SubResource("Node_return_default"), SubResource("Node_intro"), SubResource("Node_present"), SubResource("Node_gift")])
+nodes = Array[ExtResource("2")]([SubResource("Node_return_impressed"), SubResource("Node_return_default"), SubResource("Node_intro"), SubResource("Node_present"), SubResource("Node_gift")])
